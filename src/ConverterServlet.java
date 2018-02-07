@@ -10,11 +10,9 @@ import java.io.PrintWriter;
 public class ConverterServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-
-        Converter converter = new Converter();
 
         //meters module
 
@@ -46,29 +44,16 @@ public class ConverterServlet extends HttpServlet {
         PrintWriter writer = response.getWriter();
 
         int count = 0;
-        double metersConverted = meters;
-        double millimetersConverted = 0;
-        double centimetersConverted = 0;
+        double metersConverted;
+        double millimetersConverted;
+        double centimetersConverted;
 
+        double[] convertedMeasurements = sendMeasurmentToConverted(meters, centimeters, millimeters);
 
-        if (meters != 0){
-            metersConverted = meters;
-            millimetersConverted = converter.metersToMilimeters(meters);
-            centimetersConverted = converter.metersToCentimeters(meters);
-            count++;
-        }
-        if (centimeters != 0){
-            centimetersConverted = centimeters;
-            millimetersConverted = converter.centimetersToMilimeters(centimeters);
-            metersConverted = converter.centimetersToMeters(centimeters);
-            count++;
-        }
-        if (millimeters != 0){
-            millimetersConverted = millimeters;
-            centimetersConverted = converter.millimetersToCentimeters(millimeters);
-            metersConverted = converter.millimetersToMeters(millimeters);
-            count++;
-        }
+        metersConverted = convertedMeasurements[0];
+        centimetersConverted = convertedMeasurements[1];
+        millimetersConverted = convertedMeasurements[2];
+        count += (int)convertedMeasurements[3];
 
 
         // kilograms module
@@ -97,29 +82,20 @@ public class ConverterServlet extends HttpServlet {
         }
 
 
-        double kilogramsConverted = meters;
-        double gramsConverted = 0;
-        double milligramsConverted = 0;
+        double kilogramsConverted;
+        double gramsConverted;
+        double milligramsConverted;
+
+        double[] weightsConverted = sendWeightsToConverter(kilograms, grams, milligrams);
+
+        kilogramsConverted = weightsConverted[0];
+        gramsConverted = weightsConverted[1];
+        milligramsConverted = weightsConverted[2];
+
+        count += (int)weightsConverted[3];
 
 
-        if (kilograms != 0){
-            kilogramsConverted = kilograms;
-            gramsConverted = converter.kilogramsToGrams(kilograms);
-            milligramsConverted = converter.kilogramsToMilligrams(kilograms);
-            count++;
-        }
-        if (grams != 0){
-            gramsConverted = grams;
-            milligramsConverted = converter.gramsToMilligrams(grams);
-            kilogramsConverted = converter.gramsToKilograms(grams);
-            count++;
-        }
-        if (milligrams != 0){
-            milligramsConverted = milligrams;
-            gramsConverted = converter.milligramsToGrams(milligrams);
-            kilogramsConverted = converter.milligramsToKilograms(milligrams);
-            count++;
-        }
+        // output
 
         ConverterOutput converterOutput = new ConverterOutput();
 
@@ -133,4 +109,68 @@ public class ConverterServlet extends HttpServlet {
 
 
     }
+
+
+    private double[] sendMeasurmentToConverted(double meters, double centimeters, double millimeters){
+        double[] result = new double[4];
+        int count = 0;
+        Converter converter = new Converter();
+
+
+
+
+        if (meters != 0){
+            result[0] = meters;
+            result[2] = converter.metersToMilimeters(meters);
+            result[1] = converter.metersToCentimeters(meters);
+            count++;
+        }
+        if (centimeters != 0){
+            result[1] = centimeters;
+            result[2] = converter.centimetersToMilimeters(centimeters);
+            result[0] = converter.centimetersToMeters(centimeters);
+            count++;
+        }
+        if (millimeters != 0){
+            result[2] = millimeters;
+            result[1] = converter.millimetersToCentimeters(millimeters);
+            result[0] = converter.millimetersToMeters(millimeters);
+            count++;
+        }
+
+        result[3] = count;
+
+        return result;
+
+    }
+
+    private double[] sendWeightsToConverter(double kilograms, double grams, double milligrams){
+        double[] result = new double[4];
+        int count = 0;
+        Converter converter = new Converter();
+
+        if (kilograms != 0){
+            result[0] = kilograms;
+            result[1] = converter.kilogramsToGrams(kilograms);
+            result[2] = converter.kilogramsToMilligrams(kilograms);
+            count++;
+        }
+        if (grams != 0){
+            result[1] = grams;
+            result[2] = converter.gramsToMilligrams(grams);
+            result[0] = converter.gramsToKilograms(grams);
+            count++;
+        }
+        if (milligrams != 0){
+            result[2] = milligrams;
+            result[1] = converter.milligramsToGrams(milligrams);
+            result[0] = converter.milligramsToKilograms(milligrams);
+            count++;
+        }
+
+        result[3] = count;
+
+        return result;
+    }
+
 }
